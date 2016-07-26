@@ -1,0 +1,8 @@
+{
+  "name": "socket-game-example",
+  "version": "0.0.1",
+  "description": "networkgame",
+  "dependencies": {
+    "express": "^4.10.2"
+  }
+}
