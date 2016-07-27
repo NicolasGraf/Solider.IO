@@ -4,14 +4,16 @@ var util = require("util"),
 	http = require('http').Server(app), 
 	io = require("socket.io")(http), 
 	Player = require("./Player").Player;	//Externe Playerklasse
+	Bullet = require("./Bullet").Bullet;
 	
-var socket, players;
+var socket, players, bullets;
 
 function init(){
 	players = [];
 	http.listen(3000, function(){});
 	app.use(express.static(__dirname + '/public'));
 	setEventHandlers();
+	bullets = [];
 }
 
 var setEventHandlers = function(){
@@ -24,6 +26,7 @@ function onSocketConnection(socket){
 	socket.on("new player", onNewPlayer);
 	socket.on("move player", onMovePlayer);
 	socket.on("rotate player", onRotatePlayer);
+	socket.on("new bullet", onNewBullet);
 }
 
 function onClientDisconnect(){
@@ -77,6 +80,16 @@ function onRotatePlayer(data){
 	
 	this.broadcast.emit("rotate player", {id: rotatePlayer.id, angle: rotatePlayer.getAngle()});
 	
+}
+function onNewBullet(data){
+	var newBullet = new Bullet(data.x, data.y, data.angle, data.dx, data.dy);
+	bullets.push(newBullet);
+	
+	this.broadcast.emit("new Bullet", {x: newBullet.getX(),
+										y: newBullet.getY(),
+										angle: newBullet.getAngle(),
+										dx: newBullet.getDx(),
+										dy: newBullet.getDy()});
 }
 init();
 

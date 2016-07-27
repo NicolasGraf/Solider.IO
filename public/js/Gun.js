@@ -26,7 +26,6 @@ var Gun = function(parentPlayer){
 		y = carrier.getY();
 		rounds = carrier.getAmmo();
 		lookingAngle = carrier.getAngle();
-		console.log(lookingAngle);
 	}
 	var draw = function(ctx){
 		//Speichern bevor wir den context bewegen und rotieren		
@@ -38,16 +37,9 @@ var Gun = function(parentPlayer){
 		ctx.restore();
 	}
 	var shoot = function(destX, destY){
-		var deltaX = destX - x;
-		var deltaY = destY - y;
-		var magnitude = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-		var scale = 1 / magnitude;
-		var velX = deltaX * scale;
-		var velY = deltaY * scale;
-		
 		rounds -= 1;
 		
-		return new Bullet(this, velX, velY);
+		return new Bullet(x, y, lookingAngle, destX, destY);
 	}
 	init();
 	

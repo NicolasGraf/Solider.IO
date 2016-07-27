@@ -7,6 +7,7 @@ var Player = function(startX, startY) {
 		id,
 		gun,
 		ammo,
+		health,
 		lookingAngle,
 		playerImage,
 		moveAmount = 2;
@@ -55,6 +56,7 @@ var Player = function(startX, startY) {
 		playerImage.onload = function(){
 			playerReady = true;
 		}
+		health = 100;
 		gun = new Gun(this);
 		ammo = 100;
 	};
@@ -76,6 +78,9 @@ var Player = function(startX, startY) {
 	var getGun = function(){
 		return gun;
 	}
+	var doDamage = function(dmg){
+		health -= dmg;
+	}
 
 	return {
 		update: update,
@@ -89,6 +94,7 @@ var Player = function(startX, startY) {
 		getX: getX,
 		getY: getY,
 		setX: setX,
-		setY: setY
+		setY: setY,
+		doDamage: doDamage
 	}
 };

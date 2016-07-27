@@ -76,7 +76,9 @@ var setEventHandlers = function() {
 		shooting = true;
 		var aimX = e.clientX - ((window.innerWidth - 800) / 2);
 		var aimY = e.clientY;
-		flyingBullets.push(localPlayer.shootAt(aimX, aimY));		
+		var tempBullet = localPlayer.shootAt(aimX, aimY);
+		flyingBullets.push(tempBullet);
+		socket.emit("new bullet", {x: localPlayer.getX(), y: localPlayer.getY(), angle: localPlayer.getAngle(), dx: aimX, dy: aimY});		
 		
 	}, false);
 	
@@ -92,7 +94,8 @@ var setEventHandlers = function() {
 	socket.on("move player", onMovePlayer);
 	socket.on("remove Player", onRemovePlayer);
 	socket.on("rotate player", onRotatePlayer);
-	socket.on("shooting", onShooting);
+	socket.on("new Bullet", onNewBullet);
+	socket.on("update Bullet", function(){});
 	
 };
 
@@ -160,8 +163,11 @@ function onRotatePlayer(data){
 	
 }
 
-function onShooting(data){
-	
+function onNewBullet(data){
+	var newBullet = new Bullet(data.x, data.y, data.angle, data.dx, data.dy);
+	console.log(data.x, data.y, data.angle, data.dx, data.dy);
+	flyingBullets.push(newBullet);
+	console.log(flyingBullets.length);
 }
 
 function onRemovePlayer(data){
@@ -210,8 +216,7 @@ function update() {
 	
 	this.updateAngle();
 	localPlayer.setAngle(mouseAngle);
-	localPlayer.update(keys);
-	
+	localPlayer.update(keys);	
 
 	socket.emit("move player", {x: localPlayer.getX(), y: localPlayer.getY()});
 	socket.emit("rotate player", {angle: localPlayer.getAngle()});
@@ -239,7 +244,8 @@ function draw() {
 		if(flyingBullets[i].isAlive() == true){
 			flyingBullets[i].draw(ctx);
 		} else{
-			flyingBullets.splice(i, 0);
+			console.log("Bullet removed");
+			flyingBullets.splice(i, 1);
 		}
 	}
 	
