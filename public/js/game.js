@@ -6,10 +6,11 @@ var canvas,			// Canvas DOM element
 	ctx,			// Canvas rendering context
 	keys,			// Keyboard input
 	localPlayer,	// Local player
-	remotePlayers,	
-	socket,
+	remotePlayers,	//Andere Spieler
+	socket,			
 	mouseX,
 	mouseY,
+	mouseAngle,
 	flyingBullets;
 
 /**************************************************
@@ -22,12 +23,11 @@ function init() {
 	
 	ctx = canvas.getContext("2d");
 
-	// Maximise the canvas
+	// Erstmal
 	canvas.width = 800;
 	canvas.height = 600;
 	
-	console.log(window.innerWidth);
-	console.log(window.innerHeight);
+	//Potenzielle zweite Layer
 	ghostCanvas.width = 800;
 	ghostCanvas.height = 600;
 	
@@ -52,9 +52,7 @@ function init() {
 	flyingBullets = [];
 	
 	// Start listening for events
-	setEventHandlers();
-	
-	
+	setEventHandlers();	
 };
 
 
@@ -68,29 +66,25 @@ var setEventHandlers = function() {
 
 	// Window resize
 	window.addEventListener("resize", onResize, false);
-	addEventListener("mousemove", function(e) {
+	addEventListener("mousemove", function(e){
 		mouseX = e.clientX;
 		mouseY = e.clientY;
-		var aimX = mouseX - ((window.innerWidth - 800) / 2);
-		var aimY = mouseY;
-		angle = Math.atan2(aimX - localPlayer.getX(), localPlayer.getY() - aimY);
-		localPlayer.setAngle(angle);
-
+		updateAngle();
 	}, false);
 	
 	addEventListener("mousedown", function(e){
 		shooting = true;
-
 		var aimX = e.clientX - ((window.innerWidth - 800) / 2);
 		var aimY = e.clientY;
-		flyingBullets.push(localPlayer.shootAt(aimX, aimY));
-		
+		flyingBullets.push(localPlayer.shootAt(aimX, aimY));		
 		
 	}, false);
 	
 	addEventListener("mouseup", function(e){
 		shooting = false;
 	}, false);
+	
+
 	
 	socket.on("connect", onSocketConnected);
 	socket.on("disconnect", onSocketDisconnect);
@@ -151,14 +145,14 @@ function onMovePlayer(data){
 	};
 	
 	movePlayer.setX(data.x);
-	movePlayer.setY(data.y);	
+	movePlayer.setY(data.y);
 }
 
 function onRotatePlayer(data){
 	var rotatePlayer = playerById(data.id);
 	
 	if(!rotatePlayer){
-		util.log("Player not found: " + data.id);
+		console.log("Player not found: " + data.id);
 		return;
 	};
 	
@@ -181,6 +175,14 @@ function onRemovePlayer(data){
 	
 }
 
+function updateAngle(){	
+		//Correct Mouse Position
+		var aimX = mouseX - ((window.innerWidth - 800) / 2);
+		var aimY = mouseY;
+		//Calc Angle to Player
+		mouseAngle = Math.atan2(aimX - localPlayer.getX(), localPlayer.getY() - aimY);
+		
+	}
 
 /**************************************************
 ** GAME ANIMATION LOOP
@@ -206,7 +208,11 @@ function animate() {
 **************************************************/
 function update() {
 	
+	this.updateAngle();
+	localPlayer.setAngle(mouseAngle);
 	localPlayer.update(keys);
+	
+
 	socket.emit("move player", {x: localPlayer.getX(), y: localPlayer.getY()});
 	socket.emit("rotate player", {angle: localPlayer.getAngle()});
 	
@@ -220,12 +226,23 @@ function draw() {
 	// Wipe the canvas clean
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-	// Draw the local player
+	// Draw the local player and his gun
 	localPlayer.draw(ctx);
-	var i;
-	for(i = 0; i < remotePlayers.length; i++){
+	localPlayer.getGun().draw(ctx);
+	//Draw remoteplayers and their guns
+	for(var i = 0; i < remotePlayers.length; i++){
 		remotePlayers[i].draw(ctx);
+		remotePlayers[i].getGun().draw(ctx);
 	};
+	//Draw all the Bullets flying around
+	for(var i = 0; i < flyingBullets.length; i++){
+		if(flyingBullets[i].isAlive() == true){
+			flyingBullets[i].draw(ctx);
+		} else{
+			flyingBullets.splice(i, 0);
+		}
+	}
+	
 };
 
 function playerById(id){

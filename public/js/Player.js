@@ -21,12 +21,12 @@ var Player = function(startX, startY) {
 		
 	var setX = function(newX){
 		x = newX;
-		gun.update(x, y, lookingAngle);
+		gun.update(this);
 	};
 	
 	var setY = function(newY){
 		y = newY;
-		gun.update(x, y, lookingAngle);
+		gun.update(this);
 	};
 
 	var update = function(keys) {
@@ -36,23 +36,17 @@ var Player = function(startX, startY) {
 		} else if (keys.down) {
 			y += moveAmount;
 		};
-
 		// Left key takes priority over right
 		if (keys.left) {
 			x -= moveAmount;
 		} else if (keys.right) {
 			x += moveAmount;
 		};
-		
-		gun.update(x, y, lookingAngle);
-		
-		
+		gun.update(this);
 	};
 
 	var draw = function(ctx) {		
-		if(playerReady) ctx.drawImage(playerImage, x-25, y-25);
-		gun.draw(ctx);
-		
+		if(playerReady) ctx.drawImage(playerImage, x-25, y-25);		
 	};
 	var init = function(){
 		playerImage = new Image();
@@ -60,7 +54,7 @@ var Player = function(startX, startY) {
 		playerImage.src = "./js/Images/green.png";
 		playerImage.onload = function(){
 			playerReady = true;
-		}		
+		}
 		gun = new Gun(this);
 		ammo = 100;
 	};
@@ -70,7 +64,6 @@ var Player = function(startX, startY) {
 	}
 	var setAngle = function(angle){
 		lookingAngle = angle;
-		gun.update(x, y, lookingAngle);
 	}
 	
 	var shootAt = function(x, y){		
@@ -80,6 +73,9 @@ var Player = function(startX, startY) {
 	var getAmmo = function(){
 		return ammo;
 	}
+	var getGun = function(){
+		return gun;
+	}
 
 	return {
 		update: update,
@@ -88,6 +84,7 @@ var Player = function(startX, startY) {
 		getAngle: getAngle,
 		setAngle: setAngle,
 		getAmmo: getAmmo,
+		getGun: getGun,
 		shootAt: shootAt,
 		getX: getX,
 		getY: getY,

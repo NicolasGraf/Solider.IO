@@ -5,7 +5,8 @@ var Bullet = function(parentGun, directionX, directionY){
 	bulletImage,
 	dx = directionX,
 	dy = directionY,
-	rotated = false,
+	alive,
+	speed,
 	lifespan;
 	
 	var init= function(){
@@ -14,30 +15,41 @@ var Bullet = function(parentGun, directionX, directionY){
 		bulletImage.onload = function(){
 			bulletReady = true;
 		}
-		bulletImage.src = "./js/Images/bullet.png";
-		console.log(x, y);
+		bulletImage.src = "./js/Images/bullet.png";		
+		alive = true;
+		speed = 10;
+		lifespan = 30;
+		console.log("Bullet fired");
 	}
 	
 	var update = function(){		
-		x += dx;
-		y += dy;
+		x += dx * speed;
+		y += dy * speed;
+		lifespan--;
+		console.log(alive);
+		console.log(lifespan);
+		if(lifespan <= 0){
+			alive = false;
+		}
 	}
 	
 	var draw = function(ctx){
 		ctx.save();
 		ctx.translate(x, y);
 		ctx.rotate(angle);
-		
-		ctx.drawImage(bulletImage, x, y);
+		ctx.drawImage(bulletImage, -5, -50);	
 		ctx.restore();
 		this.update();
-		rotated = true;
-		
+			
+	}
+	var isAlive = function(){	
+		return alive;
 	}
 	init();
 	return{
 		init: init,
 		update: update,
-		draw: draw
+		draw: draw,
+		isAlive: isAlive
 	}
 }
